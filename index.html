@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقييم مطعم ومشويات الطيب</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .bg-image {
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+            url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop');
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .logo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid #f1c40f;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.65);
+            padding: 30px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 85%;
+            max-width: 400px;
+        }
+
+        h1 { color: #f1c40f; margin-bottom: 10px; font-size: 24px; }
+        p.subtitle { color: white; margin-bottom: 30px; font-size: 16px; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 18px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-positive {
+            background-color: #27ae60;
+            color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-negative {
+            background-color: #e74c3c;
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .footer-text {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-image">
+    <img src="https://via.placeholder.com/150?text=الطيب" alt="مطعم ومشويات الطيب" class="logo">
+
+    <div class="container">
+        <h1>مطعم ومشويات الطيب</h1>
+        <p class="subtitle">نسعد بتقييمكم لخدمتنا</p>
+        
+        <a href="https://search.google.com/local/writereview?placeid=ChIJq-FYuPQ5WBQRaAhFrbMTaLI" target="_blank" class="btn btn-positive">😍 تقييم إيجابي (5 نجوم)</a>
+
+        <a href="https://wa.me/201016944198?text=عندي%20تعليق%20سلبي%20لمكان%20حضرتك%20:%20" target="_blank" class="btn btn-negative">😞 تقييم سلبي (شكوى)</a>
+        
+        <p class="footer-text">شكراً لاختياركم مطعم الطيب</p>
+    </div>
+</div>
+
+</body>
+</html>
