@@ -3,104 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقييم مطعم ومشويات الطيب</title>
+    <title>إدارة طلبات المطعم - فورية</title>
+    <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .bg-image {
-            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-            url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop');
-            height: 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .logo {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 20px;
-            border: 3px solid #f1c40f;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .container {
-            background: rgba(0, 0, 0, 0.65);
-            padding: 30px;
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 85%;
-            max-width: 400px;
-        }
-
-        h1 { color: #f1c40f; margin-bottom: 10px; font-size: 24px; }
-        p.subtitle { color: white; margin-bottom: 30px; font-size: 16px; }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 18px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn:active { transform: scale(0.96); }
-
-        .btn-positive {
-            background-color: #27ae60;
-            color: white;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-        }
-
-        .btn-negative {
-            background-color: #e74c3c;
-            color: white;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-        }
-
-        .footer-text {
-            color: #aaa;
-            font-size: 12px;
-            margin-top: 20px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: #fff; margin: 0; padding: 20px; }
+        .header { background: linear-gradient(135deg, #e94560, #950740); padding: 20px; text-align: center; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: #162447; border-radius: 10px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-right: 6px solid #e94560; position: relative; animation: fadeIn 0.5s ease-out; }
+        .card.completed { border-right-color: #00b4d8; opacity: 0.6; background: #1f4068; }
+        .card h3 { margin-top: 0; color: #00b4d8; font-size: 22px; border-bottom: 1px solid #1f4068; padding-bottom: 10px; }
+        .card p { margin: 10px 0; font-size: 16px; color: #c5a880; }
+        .order-details { background: #1f4068; padding: 10px; border-radius: 6px; color: #fff; margin: 10px 0; }
+        .total-price { font-size: 18px; color: #ffca28; font-weight: bold; }
+        .btn-action { background: #e94560; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 15px; }
+        .btn-action:hover { background: #950740; }
+        .badge-new { background: #ff1744; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; position: absolute; left: 20px; top: 20px; animation: blink 1s infinite; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="bg-image">
-    <img src="https://via.placeholder.com/150?text=الطيب" alt="مطعم ومشويات الطيب" class="logo">
-
     <div class="container">
-        <h1>مطعم ومشويات الطيب</h1>
-        <p class="subtitle">نسعد بتقييمكم لخدمتنا</p>
-        
-        <a href="https://search.google.com/local/writereview?placeid=ChIJq-FYuPQ5WBQRaAhFrbMTaLI" target="_blank" class="btn btn-positive">😍 تقييم إيجابي (5 نجوم)</a>
+        <div class="header">
+            <h1>🍔 لوحة تحكم طلبات المطبخ والمطعم</h1>
+            <p>تظهر الطلبات هنا في نفس ثانية طلب العميل تلقائياً وبدون تحديث الصفحة</p>
+        </div>
 
-        <a href="https://wa.me/201016944198?text=عندي%20تعليق%20سلبي%20لمكان%20حضرتك%20:%20" target="_blank" class="btn btn-negative">😞 تقييم سلبي (شكوى)</a>
-        
-        <p class="footer-text">شكراً لاختياركم مطعم الطيب</p>
+        <div class="grid" id="orders-box">
+            <div id="no-orders" style="text-align: center; grid-column: 1/-1; padding: 40px; color: #888;">
+                📥 في انتظار وصول طلبات جديدة من البوت...
+            </div>
+        </div>
     </div>
-</div>
 
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav" preload="auto"></audio>
+
+    <script>
+        // إعداد الاتصال اللحظي (مفتاح عام مجاني خاص بمشروعك)
+        const pusher = new Pusher('7b6d5f8a3c2e1b4a5f6d', { cluster: 'eu' }); 
+        const channel = pusher.subscribe('hotel-restaurant');
+
+        // أول ما البوت يبعت طلب.. الكود ده هيلقطه فوراً
+        channel.bind('new-order', function(data) {
+            // تشغيل صوت التنبيه للمطبخ
+            document.getElementById('notif-sound').play();
+
+            // إخفاء رسالة "لا توجد طلبات"
+            const noOrdersHint = document.getElementById('no-orders');
+            if (noOrdersHint) noOrdersHint.remove();
+
+            // تجهيز كارت الطلب الجديد
+            const ordersBox = document.getElementById('orders-box');
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // تحويل نص الطلب القادم من البوت لشكل منظم
+            let orderItems = "";
+            try {
+                const items = JSON.parse(data.order.replace(/'/g, '"'));
+                for (const [name, qty] of Object.entries(items)) {
+                    orderItems += `<div>• ${name} (العدد: ${qty})</div>`;
+                }
+            } catch(e) {
+                orderItems = data.order; // لو حصل مشكلة يظهر النص زي ما هو
+            }
+
+            card.innerHTML = `
+                <span class="badge-new">جديد 🔔</span>
+                <h3>غرفة: ${data.room}</h3>
+                <p><strong>الاسم:</strong> ${data.name}</p>
+                <div class="order-details">
+                    <strong>الطلبات:</strong>
+                    <div style="margin-top: 5px;">${orderItems}</div>
+                </div>
+                <p class="total-price">الحساب الإجمالي: ${data.total} EGP</p>
+                <button class="btn-action" onclick="finishOrder(this)">✅ جاهز للتوصيل</button>
+            `;
+
+            // إضافة الطلب الجديد في أول القائمة فوق
+            ordersBox.insertBefore(card, ordersBox.firstChild);
+        });
+
+        // دالة لإنهاء الطلب وتغيير لونه
+        function finishOrder(btn) {
+            const card = btn.parentElement;
+            card.classList.add('completed');
+            card.querySelector('.badge-new').remove();
+            btn.remove();
+            
+            const doneLabel = document.createElement('div');
+            doneLabel.style.color = '#00b4d8';
+            doneLabel.style.textAlign = 'center';
+            doneLabel.style.fontWeight = 'bold';
+            doneLabel.style.marginTop = '15px';
+            doneLabel.innerText = "👍 تم تسليم الطلب للغرفة";
+            card.appendChild(doneLabel);
+        }
+    </script>
 </body>
 </html>
