@@ -2,27 +2,25 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم المشرف</title>
+    <title>لوحة استقبال الطلبات</title>
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <style>
+        body { background: #000; color: #00ff00; padding: 20px; font-family: monospace; }
+        .order { border: 1px solid #00ff00; padding: 15px; margin: 10px; }
+    </style>
 </head>
 <body>
-    <h1>شاشة متابعة الطلبات</h1>
-    <div id="orders-list"></div>
+    <h1>مراقب الطلبات اللحظي</h1>
+    <div id="display"></div>
 
     <script>
         const ably = new Ably.Realtime('0xzGaw.lE_D6w:BWnvUIkCtSy0pxAJxzno5KXIXyrP2WhBdfzMJS08ne4');
-        const channel = ably.channels.get('hotel-channel');
+        const channel = ably.channels.get('hotel-orders');
 
-        // الربط: "لو جالك رسالة جديدة، نفذ الكود ده"
-        channel.subscribe('new-order', (message) => {
-            const data = message.data;
-            const ordersList = document.getElementById('orders-list');
-            ordersList.innerHTML += `
-                <div style="border:1px solid gold; padding:10px; margin:5px;">
-                    طلب جديد من غرفة ${data.room}: ${data.service} <br>
-                    <small>الوقت: ${data.time}</small>
-                </div>
-            `;
+        // استماع مستمر للطلبات
+        channel.subscribe('new-order', (m) => {
+            document.getElementById('display').innerHTML += 
+            `<div class="order">طلب جديد: ${m.data.service} - الساعة: ${m.data.time}</div>`;
         });
     </script>
 </body>
