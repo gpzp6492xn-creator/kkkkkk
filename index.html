@@ -2,123 +2,28 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شاشة تحكم المطبخ الفاخر</title>
-    <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg: #060913; --surface: #0f1626; --orange: #ff9f1c; --blue: #00b4d8; --green: #2ec4b6; --text-main: #f4f6f9;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 25px; direction: rtl; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(255,159,28,0.15); padding-bottom: 15px; margin-bottom: 30px; }
-        .header h1 { margin: 0; font-size: 26px; color: var(--orange); }
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        @media (max-width: 850px) { .admin-grid { grid-template-columns: 1fr; } }
-        .column-panel { background: rgba(15, 22, 38, 0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 20px; min-height: 70vh; }
-        .column-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .order-card { background: var(--surface); border: 1px solid rgba(255, 159, 28, 0.2); border-radius: 18px; padding: 20px; position: relative; margin-bottom: 15px; }
-        .room-badge { position: absolute; top: 15px; left: 15px; background: var(--orange); color: #000; font-weight: bold; padding: 5px 12px; border-radius: 10px; }
-        .details-box { background: rgba(0,0,0,0.25); padding: 12px; border-radius: 12px; border-right: 3px solid var(--orange); margin-bottom: 15px; }
-        .price-tag { font-size: 16px; font-weight: bold; color: #ffca28; display: block; margin-bottom: 15px; }
-        .btn { width: 100%; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; }
-        .btn-prep { background: rgba(0, 180, 216, 0.15); color: var(--blue); border: 1px solid var(--blue); }
-        .btn-done { background: rgba(46, 196, 182, 0.15); color: var(--green); border: 1px solid var(--green); }
-        .no-orders { text-align: center; color: #475569; padding: 40px 0; }
-    </style>
+    <title>لوحة تحكم المشرف</title>
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 </head>
 <body>
-
-    <div class="header">
-        <h1><i class="fa-solid fa-fire-burner"></i> مطبخ الفندق الفاخر</h1>
-        <span style="color: var(--green); font-weight: bold;"><i class="fa-solid fa-circle fa-fade"></i> وضع التحكم اليدوي النشط</span>
-    </div>
-
-    <div class="admin-grid">
-        <div class="column-panel">
-            <h2 class="column-title" style="color: var(--orange);"><i class="fa-solid fa-hourglass-half"></i> طلبات معلقة</h2>
-            <div id="waiting-orders-container">
-                <div class="no-orders" id="empty-waiting">في انتظار زق طلبات من بوشر...</div>
-            </div>
-        </div>
-
-        <div class="column-panel">
-            <h2 class="column-title" style="color: var(--blue);"><i class="fa-solid fa-spinner fa-spin"></i> قيد التنفيذ</h2>
-            <div id="progress-orders-container">
-                <div class="no-orders" id="empty-progress">لا توجد طلبات جاري تحضيرها</div>
-            </div>
-        </div>
-    </div>
-
-    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav" preload="auto"></audio>
+    <h1>شاشة متابعة الطلبات</h1>
+    <div id="orders-list"></div>
 
     <script>
-        const PUSHER_KEY = 'ac85f6d2d545d57adcf'; 
-        const PUSHER_CLUSTER = 'eu';             
+        const ably = new Ably.Realtime('0xzGaw.lE_D6w:BWnvUIkCtSy0pxAJxzno5KXIXyrP2WhBdfzMJS08ne4');
+        const channel = ably.channels.get('hotel-channel');
 
-        let pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
-        
-        // تعديل: نفس القناة العامة المشتركة
-        let hotelChannel = pusher.subscribe('hotel-channel');
-
-        let activeOrders = {};
-
-        // الأدمن بيستقبل الإيفينت اللي إنت بتعمله فرقعة من موقع بوشر
-        hotelChannel.bind('client-restaurant-order', function(data) {
-            document.getElementById('notif-sound').play().catch(e => {});
-            const emptyWaiting = document.getElementById('empty-waiting'); if(emptyWaiting) emptyWaiting.remove();
-
-            activeOrders[data.id] = data;
-
-            const container = document.getElementById('waiting-orders-container');
-            container.innerHTML = `
-                <div class="order-card" id="card-${data.id}">
-                    <span class="room-badge">غرفة ${data.room}</span>
-                    <h3 style="margin: 0 0 5px 0; color:#fff;">${data.name} [ID: ${data.id}]</h3>
-                    <div style="font-size:12px; color:#94a3b8; margin-bottom:10px;">الهاتف: ${data.phone}</div>
-                    <div class="details-box"><strong>الطلب:</strong> ${data.details}</div>
-                    <span class="price-tag">الإجمالي: ${data.total} EGP</span>
-                    <button class="btn btn-prep" onclick="moveToProgress('${data.id}')"><i class="fa-solid fa-fire"></i> نقل لقيد التنفيذ</button>
+        // الربط: "لو جالك رسالة جديدة، نفذ الكود ده"
+        channel.subscribe('new-order', (message) => {
+            const data = message.data;
+            const ordersList = document.getElementById('orders-list');
+            ordersList.innerHTML += `
+                <div style="border:1px solid gold; padding:10px; margin:5px;">
+                    طلب جديد من غرفة ${data.room}: ${data.service} <br>
+                    <small>الوقت: ${data.time}</small>
                 </div>
-            ` + container.innerHTML;
+            `;
         });
-
-        function moveToProgress(orderId) {
-            const orderData = activeOrders[orderId];
-            document.getElementById(`card-${orderId}`).remove();
-            checkEmptyStates();
-
-            const emptyProgress = document.getElementById('empty-progress'); if(emptyProgress) emptyProgress.remove();
-
-            const progressContainer = document.getElementById('progress-orders-container');
-            progressContainer.innerHTML = `
-                <div class="order-card" id="card-${orderId}" style="border-color: var(--blue);">
-                    <span class="room-badge" style="background: var(--blue);">غرفة ${orderData.room}</span>
-                    <h3 style="margin: 0 0 5px 0; color:#fff;">${orderData.name}</h3>
-                    <div class="details-box" style="border-right-color: var(--blue);"><strong>الطلب:</strong> ${orderData.details}</div>
-                    <span class="price-tag">الإجمالي: ${orderData.total} EGP</span>
-                    <button class="btn btn-done" onclick="finishOrder('${orderId}')"><i class="fa-solid fa-check"></i> إنهاء وتلبية الطلب</button>
-                </div>
-            ` + progressContainer.innerHTML;
-
-            alert("تم نقله في شاشتك! لتحديثه عند النزيل؛ أرسل إيفينت client-status-updated بقيمة progress والـ ID: " + orderId);
-        }
-
-        function finishOrder(orderId) {
-            document.getElementById(`card-${orderId}`).remove();
-            delete activeOrders[orderId];
-            checkEmptyStates();
-            alert("تم حذفه من شاشتك! لتحديثه عند النزيل؛ أرسل إيفينت client-status-updated بقيمة done والـ ID: " + orderId);
-        }
-
-        function checkEmptyStates() {
-            if(document.getElementById('waiting-orders-container').children.length === 0) {
-                document.getElementById('waiting-orders-container').innerHTML = '<div class="no-orders" id="empty-waiting">في انتظار زق طلبات من بوشر...</div>';
-            }
-            if(document.getElementById('progress-orders-container').children.length === 0) {
-                document.getElementById('progress-orders-container').innerHTML = '<div class="no-orders" id="empty-progress">لا توجد طلبات جاري تحضيرها</div>';
-            }
-        }
     </script>
 </body>
 </html>
