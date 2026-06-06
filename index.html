@@ -31,14 +31,14 @@
 
     <div class="header">
         <h1><i class="fa-solid fa-fire-burner"></i> مطبخ الفندق الفاخر</h1>
-        <span style="color: var(--green); font-weight: bold;"><i class="fa-solid fa-circle fa-fade"></i> الربط المباشر اللحظي نشط</span>
+        <span style="color: var(--green); font-weight: bold;"><i class="fa-solid fa-circle fa-fade"></i> وضع التحكم اليدوي النشط</span>
     </div>
 
     <div class="admin-grid">
         <div class="column-panel">
             <h2 class="column-title" style="color: var(--orange);"><i class="fa-solid fa-hourglass-half"></i> طلبات معلقة</h2>
             <div id="waiting-orders-container">
-                <div class="no-orders" id="empty-waiting">في انتظار طلبات جديدة...</div>
+                <div class="no-orders" id="empty-waiting">في انتظار زق طلبات من بوشر...</div>
             </div>
         </div>
 
@@ -57,12 +57,13 @@
         const PUSHER_CLUSTER = 'eu';             
 
         let pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
-        // نفس اسم القناة المفتوحة للربط المباشر
-        let hotelChannel = pusher.subscribe('client-hotel-channel');
+        
+        // تعديل: نفس القناة العامة المشتركة
+        let hotelChannel = pusher.subscribe('hotel-channel');
 
         let activeOrders = {};
 
-        // استقبال الطلب من النزيل
+        // الأدمن بيستقبل الإيفينت اللي إنت بتعمله فرقعة من موقع بوشر
         hotelChannel.bind('client-restaurant-order', function(data) {
             document.getElementById('notif-sound').play().catch(e => {});
             const emptyWaiting = document.getElementById('empty-waiting'); if(emptyWaiting) emptyWaiting.remove();
@@ -73,19 +74,16 @@
             container.innerHTML = `
                 <div class="order-card" id="card-${data.id}">
                     <span class="room-badge">غرفة ${data.room}</span>
-                    <h3 style="margin: 0 0 5px 0; color:#fff;">${data.name}</h3>
+                    <h3 style="margin: 0 0 5px 0; color:#fff;">${data.name} [ID: ${data.id}]</h3>
                     <div style="font-size:12px; color:#94a3b8; margin-bottom:10px;">الهاتف: ${data.phone}</div>
                     <div class="details-box"><strong>الطلب:</strong> ${data.details}</div>
                     <span class="price-tag">الإجمالي: ${data.total} EGP</span>
-                    <button class="btn btn-prep" onclick="moveToProgress('${data.id}')"><i class="fa-solid fa-fire"></i> قيد التنفيذ</button>
+                    <button class="btn btn-prep" onclick="moveToProgress('${data.id}')"><i class="fa-solid fa-fire"></i> نقل لقيد التنفيذ</button>
                 </div>
             ` + container.innerHTML;
         });
 
         function moveToProgress(orderId) {
-            // تحديث حالة الطلب وإرسالها للنزيل
-            hotelChannel.trigger('client-status-updated', { orderId: orderId, newStatus: 'progress' });
-
             const orderData = activeOrders[orderId];
             document.getElementById(`card-${orderId}`).remove();
             checkEmptyStates();
@@ -99,23 +97,23 @@
                     <h3 style="margin: 0 0 5px 0; color:#fff;">${orderData.name}</h3>
                     <div class="details-box" style="border-right-color: var(--blue);"><strong>الطلب:</strong> ${orderData.details}</div>
                     <span class="price-tag">الإجمالي: ${orderData.total} EGP</span>
-                    <button class="btn btn-done" onclick="finishOrder('${orderId}')"><i class="fa-solid fa-check"></i> تم التنفيذ</button>
+                    <button class="btn btn-done" onclick="finishOrder('${orderId}')"><i class="fa-solid fa-check"></i> إنهاء وتلبية الطلب</button>
                 </div>
             ` + progressContainer.innerHTML;
+
+            alert("تم نقله في شاشتك! لتحديثه عند النزيل؛ أرسل إيفينت client-status-updated بقيمة progress والـ ID: " + orderId);
         }
 
         function finishOrder(orderId) {
-            // إخطار النزيل بأن الطلب انتهى
-            hotelChannel.trigger('client-status-updated', { orderId: orderId, newStatus: 'done' });
-
             document.getElementById(`card-${orderId}`).remove();
             delete activeOrders[orderId];
             checkEmptyStates();
+            alert("تم حذفه من شاشتك! لتحديثه عند النزيل؛ أرسل إيفينت client-status-updated بقيمة done والـ ID: " + orderId);
         }
 
         function checkEmptyStates() {
             if(document.getElementById('waiting-orders-container').children.length === 0) {
-                document.getElementById('waiting-orders-container').innerHTML = '<div class="no-orders" id="empty-waiting">في انتظار طلبات جديدة...</div>';
+                document.getElementById('waiting-orders-container').innerHTML = '<div class="no-orders" id="empty-waiting">في انتظار زق طلبات من بوشر...</div>';
             }
             if(document.getElementById('progress-orders-container').children.length === 0) {
                 document.getElementById('progress-orders-container').innerHTML = '<div class="no-orders" id="empty-progress">لا توجد طلبات جاري تحضيرها</div>';
